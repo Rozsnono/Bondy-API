@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard,
     PawPrint,
@@ -15,9 +15,10 @@ import {
     Wifi,
     Battery,
     Sparkles,
+    Loader2,
 } from 'lucide-react';
 
-const ADMIN_VERSION = 'v2.4.0';
+const ADMIN_VERSION = 'v2.5.0';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -82,22 +83,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, color: 'from-blue-500 to-indigo-600' },
         { name: 'Pet Species', href: '/admin/pet-templates', icon: PawPrint, color: 'from-pink-500 to-rose-600' },
         { name: 'Shop Catalog', href: '/admin/shop', icon: ShoppingBag, color: 'from-amber-500 to-orange-600' },
-        { name: 'Users & Couples', href: '/admin/users', icon: Users, color: 'from-emerald-500 to-teal-600' },
+        { name: 'Users Directory', href: '/admin/users', icon: Users, color: 'from-cyan-500 to-blue-600' },
+        { name: 'Couples Hub', href: '/admin/couples', icon: Heart, color: 'from-emerald-500 to-teal-600' },
     ];
 
     const getActiveAppName = () => {
         if (pathname === '/admin/pet-templates') return 'Pet Species App';
         if (pathname === '/admin/shop') return 'Shop Catalog App';
-        if (pathname === '/admin/users') return 'Users & Couples App';
+        if (pathname === '/admin/users') return 'Users Directory App';
+        if (pathname === '/admin/couples') return 'Couples Hub App';
         return 'Dashboard App';
     };
 
+    // macOS Boot Loader
     if (isAuthenticated === null) {
         return (
-            <div className="min-h-screen bg-[#07080c] flex items-center justify-center text-slate-400 font-sans">
-                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-                    Booting Bondy OS {ADMIN_VERSION}...
+            <div className="min-h-screen bg-[#07080c] flex flex-col items-center justify-center text-slate-400 font-sans space-y-4 select-none">
+                <motion.div
+                    animate={{ scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-pink-500/30 text-white"
+                >
+                    <Heart className="w-8 h-8 fill-white" />
                 </motion.div>
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+                    <Loader2 className="w-4 h-4 animate-spin text-pink-400" />
+                    <span>Booting Bondy OS {ADMIN_VERSION}...</span>
+                </div>
             </div>
         );
     }
@@ -154,7 +166,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return (
         <div className="h-screen w-screen bg-[#090a0f] text-slate-100 flex flex-col font-sans select-none overflow-hidden relative bg-[radial-gradient(ellipse_120%_120%_at_50%_0%,rgba(219,39,119,0.18),rgba(10,12,20,1))]">
-            {/* 1. macOS Top Menu Bar with Version Tag */}
+            {/* 1. macOS Top Menu Bar */}
             <header className="h-7 bg-slate-950/70 backdrop-blur-2xl border-b border-white/10 px-4 flex items-center justify-between text-xs font-medium text-slate-300 z-50 fixed top-0 left-0 right-0">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
@@ -180,9 +192,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
             </header>
 
-            {/* 2. Full-Screen Desktop Canvas Area */}
+            {/* 2. Full-Screen Desktop Canvas with macOS App Window Open/Shrink Animation */}
             <main className="flex-1 pt-9 pb-[88px] px-2 sm:px-4 w-full h-full overflow-hidden flex flex-col">
-                {children}
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={pathname}
+                        initial={{ scale: 0.88, opacity: 0, y: 30 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.88, opacity: 0, y: 30 }}
+                        transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                        className="w-full h-full flex-1 flex flex-col"
+                    >
+                        {children}
+                    </motion.div>
+                </AnimatePresence>
             </main>
 
             {/* 3. macOS Floating Bottom Dock */}
@@ -198,7 +221,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         return (
                             <Link key={app.href} href={app.href}>
                                 <motion.div
-                                    whileHover={{ scale: 1.2, y: -8 }}
+                                    whileHover={{ scale: 1.25, y: -10 }}
                                     whileTap={{ scale: 0.95 }}
                                     className="relative group flex flex-col items-center"
                                 >
@@ -227,7 +250,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <div className="w-px h-8 bg-white/15 mx-1" />
 
                     <motion.button
-                        whileHover={{ scale: 1.2, y: -8 }}
+                        whileHover={{ scale: 1.25, y: -10 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleLogout}
                         className="relative group flex flex-col items-center"

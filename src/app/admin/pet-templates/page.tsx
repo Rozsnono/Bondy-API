@@ -2,12 +2,29 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit, X, Minus, Maximize2 } from 'lucide-react';
+import {
+    Plus,
+    Trash2,
+    Edit,
+    PawPrint,
+    X,
+    Minus,
+    Maximize2,
+    ChevronLeft,
+    ChevronRight,
+    LayoutGrid,
+    List,
+    Search,
+    Folder,
+    Send,
+} from 'lucide-react';
 import { IPetTemplate, PetCategory } from '@/types/db';
 
 export default function PetTemplatesAdminPage() {
     const [templates, setTemplates] = useState<IPetTemplate[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -135,93 +152,148 @@ export default function PetTemplatesAdminPage() {
         }
     };
 
+    const filteredTemplates = templates.filter((t) => {
+        const matchesCat = selectedCategory === 'all' || t.category === selectedCategory;
+        const matchesSearch = t.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCat && matchesSearch;
+    });
+
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.99 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2 }}
-            className="w-full h-full flex-1 bg-slate-900/70 border border-white/10 rounded-2xl backdrop-blur-3xl shadow-2xl flex flex-col overflow-hidden"
+            className="w-full h-full flex-1 bg-[#1a1b26] border border-white/10 rounded-2xl shadow-2xl flex overflow-hidden text-xs text-slate-200"
         >
-            {/* Window Title Bar */}
-            <div className="h-10 bg-slate-950/80 border-b border-white/10 px-4 flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-rose-500 border border-rose-600/50 flex items-center justify-center cursor-pointer">
-                        <X className="w-2 h-2 text-rose-950 opacity-0 hover:opacity-100" />
+            {/* Finder Left Sidebar */}
+            <div className="w-52 bg-[#14151f] border-r border-white/10 p-3 flex flex-col justify-between flex-shrink-0">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 px-1 py-1">
+                        <div className="w-3 h-3 rounded-full bg-rose-500 border border-rose-600/50" />
+                        <div className="w-3 h-3 rounded-full bg-amber-500 border border-amber-600/50" />
+                        <div className="w-3 h-3 rounded-full bg-emerald-500 border border-emerald-600/50" />
                     </div>
-                    <div className="w-3 h-3 rounded-full bg-amber-500 border border-amber-600/50 flex items-center justify-center cursor-pointer">
-                        <Minus className="w-2 h-2 text-amber-950 opacity-0 hover:opacity-100" />
+
+                    <div className="space-y-1">
+                        <p className="text-[10px] font-bold uppercase text-slate-500 px-2 tracking-wider">Favorites</p>
+                        <button
+                            onClick={() => setSelectedCategory('all')}
+                            className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium transition-colors ${selectedCategory === 'all' ? 'bg-rose-500/20 text-rose-400 font-bold' : 'text-slate-400 hover:bg-white/5'
+                                }`}
+                        >
+                            <PawPrint className="w-3.5 h-3.5" /> All Species
+                        </button>
                     </div>
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 border border-emerald-600/50 flex items-center justify-center cursor-pointer">
-                        <Maximize2 className="w-2 h-2 text-emerald-950 opacity-0 hover:opacity-100" />
+
+                    <div className="space-y-1">
+                        <p className="text-[10px] font-bold uppercase text-slate-500 px-2 tracking-wider">Categories</p>
+                        {['mammal', 'bird', 'reptile', 'amphibian', 'fantasy'].map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg capitalize font-medium transition-colors ${selectedCategory === cat ? 'bg-rose-500/20 text-rose-400 font-bold' : 'text-slate-400 hover:bg-white/5'
+                                    }`}
+                            >
+                                <Folder className="w-3.5 h-3.5 text-slate-500" /> {cat}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content Window */}
+            <div className="flex-1 flex flex-col overflow-hidden bg-[#1f202e]">
+                <div className="h-11 bg-[#181924] border-b border-white/10 px-4 flex items-center justify-between flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center text-slate-400">
+                            <ChevronLeft className="w-4 h-4 cursor-pointer hover:text-white" />
+                            <ChevronRight className="w-4 h-4 cursor-pointer hover:text-white" />
+                        </div>
+                        <span className="font-bold text-white text-sm">Pet Species Library</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center bg-black/40 border border-white/10 rounded-lg p-0.5 text-slate-400">
+                            <LayoutGrid className="w-4 h-4 p-1 bg-white/10 text-white rounded cursor-pointer" />
+                            <List className="w-4 h-4 p-1 cursor-pointer hover:text-white" />
+                        </div>
+
+                        <div className="relative">
+                            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-8 pr-3 py-1 bg-black/40 border border-white/10 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                            />
+                        </div>
+
+                        <button
+                            onClick={handleOpenCreate}
+                            className="flex items-center gap-1 px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold shadow-md transition-colors"
+                        >
+                            <Plus className="w-3.5 h-3.5" /> Add
+                        </button>
                     </div>
                 </div>
 
-                <span className="text-xs font-semibold text-slate-300">Pet Species App — Dynamic Lottie Engine Manager</span>
-
-                <button
-                    onClick={handleOpenCreate}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-pink-600 hover:bg-pink-500 text-white rounded-lg text-xs font-semibold shadow-md transition-colors"
-                >
-                    <Plus className="w-3.5 h-3.5" /> Add Species
-                </button>
-            </div>
-
-            {/* Body Grid */}
-            <div className="flex-1 overflow-y-auto p-6">
-                {loading ? (
-                    <p className="text-xs text-slate-500">Loading species templates...</p>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {templates.map((t) => (
-                            <div
-                                key={t._id.toString()}
-                                className="p-4 bg-black/40 border border-white/5 rounded-xl flex flex-col justify-between space-y-3 shadow-lg"
-                            >
-                                <div>
-                                    <div className="flex justify-between items-start">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-pink-500/10 text-pink-400 rounded-md border border-pink-500/20">
+                <div className="flex-1 overflow-y-auto p-6">
+                    {loading ? (
+                        <p className="text-slate-500">Loading files...</p>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                            {filteredTemplates.map((t) => (
+                                <div
+                                    key={t._id.toString()}
+                                    className="group flex flex-col items-center cursor-pointer space-y-2 text-center"
+                                >
+                                    <div className="relative w-28 h-28 rounded-2xl bg-slate-900 border border-white/10 group-hover:border-rose-500/80 group-hover:bg-rose-500/10 transition-all flex flex-col items-center justify-center p-3 shadow-lg">
+                                        <PawPrint className="w-10 h-10 text-rose-400 mb-1" />
+                                        <span className="text-[9px] uppercase font-bold text-slate-400 px-1.5 py-0.5 bg-black/50 rounded">
                                             {t.category}
                                         </span>
-                                        <span className="text-[10px] text-emerald-400 font-semibold">{t.isActive ? 'Active' : 'Disabled'}</span>
-                                    </div>
-                                    <h3 className="text-base font-bold text-white mt-1.5">{t.name}</h3>
-                                    <p className="text-xs text-slate-400 mt-1 line-clamp-2">{t.description}</p>
-                                </div>
 
-                                <div className="flex gap-2 border-t border-white/5 pt-2.5">
-                                    <button
-                                        onClick={() => handleOpenEdit(t)}
-                                        className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 text-xs text-white font-medium rounded-lg transition-colors"
-                                    >
-                                        <Edit className="w-3.5 h-3.5 mx-auto" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(t._id.toString())}
-                                        className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors"
-                                    >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
+                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                            <button
+                                                onClick={() => handleOpenEdit(t)}
+                                                className="p-1 bg-slate-800 text-white rounded hover:bg-slate-700"
+                                            >
+                                                <Edit className="w-3 h-3" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(t._id.toString())}
+                                                className="p-1 bg-rose-500/20 text-rose-400 rounded hover:bg-rose-500/40"
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <span className="font-semibold text-slate-200 group-hover:text-rose-400 transition-colors text-xs line-clamp-1">
+                                        {t.name}.lottie
+                                    </span>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* macOS System Sheet Modal */}
+            {/* macOS Mail Compose Style Sheet Modal */}
             <AnimatePresence>
                 {isModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
                         <motion.div
                             initial={{ scale: 0.94, y: -20, opacity: 0 }}
                             animate={{ scale: 1, y: 0, opacity: 1 }}
                             exit={{ scale: 0.94, y: 20, opacity: 0 }}
-                            className="bg-slate-900/95 border border-white/15 rounded-2xl w-full max-w-xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl backdrop-blur-3xl"
+                            className="bg-[#1c1c22] border border-white/15 rounded-2xl w-full max-w-xl max-h-[88vh] overflow-hidden flex flex-col shadow-2xl backdrop-blur-3xl text-xs text-slate-200"
                         >
-                            {/* macOS Dialog Title Bar */}
-                            <div className="h-9 bg-slate-950/80 border-b border-white/10 px-3.5 flex items-center justify-between flex-shrink-0">
+                            {/* Mail Toolbar Header */}
+                            <div className="h-11 bg-[#16161b] border-b border-white/10 px-4 flex items-center justify-between flex-shrink-0">
                                 <div className="flex items-center gap-2">
                                     <button
+                                        type="button"
                                         onClick={() => setIsModalOpen(false)}
                                         className="w-3 h-3 rounded-full bg-rose-500 border border-rose-600/50 flex items-center justify-center group"
                                     >
@@ -231,168 +303,161 @@ export default function PetTemplatesAdminPage() {
                                     <div className="w-3 h-3 rounded-full bg-emerald-500 border border-emerald-600/50" />
                                 </div>
 
-                                <span className="text-xs font-bold text-white tracking-wide">
-                                    {editingId ? 'Edit Species Settings' : 'Add New Species Template'}
+                                <span className="font-semibold text-slate-400 text-xs">
+                                    {editingId ? 'Edit Species Settings' : 'New Species Asset'}
                                 </span>
 
-                                <div className="w-12" />
+                                <button
+                                    type="submit"
+                                    form="speciesForm"
+                                    className="w-8 h-8 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105"
+                                >
+                                    <Send className="w-4 h-4" />
+                                </button>
                             </div>
 
-                            {/* Form Content */}
-                            <form onSubmit={handleSubmit} className="p-5 flex-1 overflow-y-auto space-y-4 text-xs">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="text-slate-300 font-medium">Species Name</label>
+                            {/* Form Content - Divided Field Rows */}
+                            <form id="speciesForm" onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+                                <div className="divide-y divide-white/10">
+                                    <div className="flex items-center px-4 py-2.5">
+                                        <span className="w-28 text-slate-400 font-semibold">Species Name:</span>
                                         <input
                                             type="text"
                                             required
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             placeholder="e.g. Shiba Inu, Dragon"
-                                            className="w-full mt-1.5 p-2 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500"
+                                            className="flex-1 bg-transparent text-white focus:outline-none font-medium placeholder-slate-600"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="text-slate-300 font-medium">Taxonomy Category</label>
+
+                                    <div className="flex items-center px-4 py-2.5">
+                                        <span className="w-28 text-slate-400 font-semibold">Category:</span>
                                         <select
                                             value={formData.category}
                                             onChange={(e) => setFormData({ ...formData, category: e.target.value as PetCategory })}
-                                            className="w-full mt-1.5 p-2 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500"
+                                            className="flex-1 bg-transparent text-white focus:outline-none font-medium cursor-pointer"
                                         >
-                                            <option value="mammal">Mammal</option>
-                                            <option value="bird">Bird (Egg-laying)</option>
-                                            <option value="reptile">Reptile (Egg-laying)</option>
-                                            <option value="amphibian">Amphibian</option>
-                                            <option value="fantasy">Fantasy</option>
+                                            <option value="mammal" className="bg-slate-900">Mammal</option>
+                                            <option value="bird" className="bg-slate-900">Bird (Egg-laying)</option>
+                                            <option value="reptile" className="bg-slate-900">Reptile (Egg-laying)</option>
+                                            <option value="amphibian" className="bg-slate-900">Amphibian</option>
+                                            <option value="fantasy" className="bg-slate-900">Fantasy</option>
                                         </select>
+                                    </div>
+
+                                    <div className="flex items-center px-4 py-2.5">
+                                        <span className="w-28 text-slate-400 font-semibold">Description:</span>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                            placeholder="Short species summary..."
+                                            className="flex-1 bg-transparent text-white focus:outline-none font-medium placeholder-slate-600"
+                                        />
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="text-slate-300 font-medium">Description</label>
-                                    <textarea
-                                        required
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="Short species summary..."
-                                        className="w-full mt-1.5 p-2 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-pink-500"
-                                        rows={2}
-                                    />
-                                </div>
-
-                                <div className="border-t border-white/10 pt-3 space-y-2.5">
-                                    <h4 className="font-bold text-pink-400">Lottie JSON Asset URLs</h4>
+                                {/* Lottie Assets Grid Area */}
+                                <div className="p-4 space-y-3 bg-black/20">
+                                    <p className="font-bold text-rose-400 uppercase tracking-wider text-[10px]">
+                                        Lottie JSON Animation URLs
+                                    </p>
 
                                     {['bird', 'reptile', 'amphibian'].includes(formData.category) && (
-                                        <div>
-                                            <label className="text-slate-400">Egg Stage Lottie URL</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Egg Lottie URL</label>
                                             <input
                                                 type="url"
                                                 value={formData.eggUrl}
                                                 onChange={(e) => setFormData({ ...formData, eggUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
                                     )}
 
                                     <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="text-slate-400">Idle State URL *</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Idle URL *</label>
                                             <input
                                                 type="url"
                                                 required
                                                 value={formData.idleUrl}
                                                 onChange={(e) => setFormData({ ...formData, idleUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="text-slate-400">Eating State URL *</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Eating URL *</label>
                                             <input
                                                 type="url"
                                                 required
                                                 value={formData.eatingUrl}
                                                 onChange={(e) => setFormData({ ...formData, eatingUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="text-slate-400">Bathing State URL *</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Bathing URL *</label>
                                             <input
                                                 type="url"
                                                 required
                                                 value={formData.bathingUrl}
                                                 onChange={(e) => setFormData({ ...formData, bathingUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="text-slate-400">Playing State URL *</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Playing URL *</label>
                                             <input
                                                 type="url"
                                                 required
                                                 value={formData.playingUrl}
                                                 onChange={(e) => setFormData({ ...formData, playingUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="text-slate-400">Sleeping State URL *</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Sleeping URL *</label>
                                             <input
                                                 type="url"
                                                 required
                                                 value={formData.sleepingUrl}
                                                 onChange={(e) => setFormData({ ...formData, sleepingUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="text-slate-400">Sick State URL *</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Sick URL *</label>
                                             <input
                                                 type="url"
                                                 required
                                                 value={formData.sickUrl}
                                                 onChange={(e) => setFormData({ ...formData, sickUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="text-slate-400">Dead State URL *</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Dead URL *</label>
                                             <input
                                                 type="url"
                                                 required
                                                 value={formData.deadUrl}
                                                 onChange={(e) => setFormData({ ...formData, deadUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
-                                        <div>
-                                            <label className="text-slate-400">Walk-In Animation URL</label>
+                                        <div className="p-2 bg-black/40 border border-white/10 rounded-xl">
+                                            <label className="text-[10px] text-slate-400 font-semibold">Walk-In URL</label>
                                             <input
                                                 type="url"
                                                 value={formData.walkInUrl}
                                                 onChange={(e) => setFormData({ ...formData, walkInUrl: e.target.value })}
-                                                className="w-full mt-1 p-1.5 bg-black/40 border border-white/10 rounded-lg text-white"
+                                                className="w-full bg-transparent text-white focus:outline-none text-xs"
                                             />
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* macOS Button Bar */}
-                                <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-white/10">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsModalOpen(false)}
-                                        className="px-4 py-1.5 bg-white/10 hover:bg-white/15 text-slate-200 rounded-xl transition-colors font-medium"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white rounded-xl font-bold shadow-lg shadow-pink-600/30 transition-all"
-                                    >
-                                        Save Changes
-                                    </button>
                                 </div>
                             </form>
                         </motion.div>
