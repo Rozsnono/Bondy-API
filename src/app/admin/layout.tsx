@@ -14,7 +14,10 @@ import {
     KeyRound,
     Wifi,
     Battery,
+    Sparkles,
 } from 'lucide-react';
+
+const ADMIN_VERSION = 'v2.4.0';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -93,7 +96,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         return (
             <div className="min-h-screen bg-[#07080c] flex items-center justify-center text-slate-400 font-sans">
                 <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-                    Booting Bondy macOS Desktop...
+                    Booting Bondy OS {ADMIN_VERSION}...
                 </motion.div>
             </div>
         );
@@ -116,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                     <div>
                         <h2 className="text-xl font-bold text-white tracking-tight">Bondy OS</h2>
-                        <p className="text-xs text-slate-400 mt-1">macOS Security Lock Screen</p>
+                        <p className="text-xs text-slate-400 mt-1">macOS Security Lock Screen • <span className="font-mono text-pink-400">{ADMIN_VERSION}</span></p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-4">
@@ -151,12 +154,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return (
         <div className="h-screen w-screen bg-[#090a0f] text-slate-100 flex flex-col font-sans select-none overflow-hidden relative bg-[radial-gradient(ellipse_120%_120%_at_50%_0%,rgba(219,39,119,0.18),rgba(10,12,20,1))]">
-            {/* 1. macOS Top Menu Bar */}
+            {/* 1. macOS Top Menu Bar with Version Tag */}
             <header className="h-7 bg-slate-950/70 backdrop-blur-2xl border-b border-white/10 px-4 flex items-center justify-between text-xs font-medium text-slate-300 z-50 fixed top-0 left-0 right-0">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
                         <Heart className="w-3.5 h-3.5 fill-pink-500 text-pink-500" />
                         <span className="font-bold text-white">Bondy OS</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 bg-pink-500/20 border border-pink-500/30 text-pink-300 rounded-md">
+                            {ADMIN_VERSION}
+                        </span>
                     </div>
                     <span className="font-semibold text-slate-200">{getActiveAppName()}</span>
                     <span className="text-slate-500 text-[11px] hover:text-slate-300 cursor-pointer hidden md:inline">File</span>
