@@ -22,30 +22,42 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        if (user.coupleId) {
-            return NextResponse.json({ error: 'You are already paired in a couple' }, { status: 400 });
-        }
-
-        const couple = await Couple.findOne({ inviteCode: inviteCode.trim().toUpperCase() });
-        if (!couple) {
+        const targetCouple = await Couple.findOne({ inviteCode: inviteCode.trim().toUpperCase() });
+        if (!targetCouple) {
             return NextResponse.json({ error: 'Invalid invite code' }, { status: 404 });
         }
 
-        if (couple.partner2Id) {
+        if (targetCouple.partner2Id) {
             return NextResponse.json({ error: 'This couple room is already full' }, { status: 400 });
         }
 
-        if (couple.partner1Id.toString() === userId) {
+        if (targetCouple.partner1Id.toString() === userId) {
             return NextResponse.json({ error: 'You cannot pair with yourself' }, { status: 400 });
         }
 
-        couple.partner2Id = user._id;
-        await couple.save();
+        // FIX: If the user has an auto-generated empty couple room (no partner2, no pet), delete it first!
+        if (user.coupleId && user.coupleId.toString() !== targetCouple._id.toString()) {
+            const userExistingCouple = await Couple.findById(user.coupleId);
+            if (
+                userExistingCouple &&
+                userExistingCouple.partner1Id.toString() === userId &&
+                !userExistingCouple.partner2Id &&
+                !userExistingCouple.petId
+            ) {
+                await Couple.findByIdAndDelete(userExistingCouple._id);
+                user.coupleId = null;
+            } else if (userExistingCouple && userExistingCouple.partner2Id) {
+                return NextResponse.json({ error: 'You are already in an active couple room' }, { status: 400 });
+            }
+        }
 
-        user.coupleId = couple._id;
+        targetCouple.partner2Id = user._id;
+        await targetCouple.save();
+
+        user.coupleId = targetCouple._id;
         await user.save();
 
-        return NextResponse.json({ message: 'Successfully joined couple!', couple });
+        return NextResponse.json({ message: 'Successfully joined couple!', couple: targetCouple });
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
