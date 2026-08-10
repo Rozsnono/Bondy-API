@@ -18,7 +18,7 @@ import {
     Loader2,
 } from 'lucide-react';
 
-const ADMIN_VERSION = 'v2.6.1';
+const ADMIN_VERSION = 'v2.6.2';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
