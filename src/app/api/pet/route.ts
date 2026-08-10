@@ -16,12 +16,12 @@ export async function GET(req: Request) {
 
         const user = await User.findById(userId);
         if (!user || !user.coupleId) {
-            return NextResponse.json({ pet: null, coupleId: null });
+            return NextResponse.json({ pet: null, coupleId: null, userGoldCoins: user?.goldCoins || 100 });
         }
 
         const pet = await Pet.findOne({ coupleId: user.coupleId });
         if (!pet) {
-            return NextResponse.json({ pet: null, coupleId: user.coupleId });
+            return NextResponse.json({ pet: null, coupleId: user.coupleId, userGoldCoins: user.goldCoins });
         }
 
         const updatedPet = await processPetStatDecay(pet);
@@ -31,6 +31,7 @@ export async function GET(req: Request) {
             pet: updatedPet,
             template,
             coupleId: user.coupleId,
+            userGoldCoins: user.goldCoins,
         });
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

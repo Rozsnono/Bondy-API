@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         // Active Interactions
         if (action === 'pet') {
             pet.stats.mood = Math.min(100, pet.stats.mood + 15);
-            user.goldCoins += 5; // Earn gold for spending quality time
+            if (pet.stats.mood < 100) user.goldCoins += 2; // Earn gold for spending quality time
             await user.save();
         } else if (action === 'sleep') {
             pet.isSleeping = true;
