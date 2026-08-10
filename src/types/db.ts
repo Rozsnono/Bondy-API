@@ -6,6 +6,11 @@ export type PetStage = 'egg' | 'baby' | 'teen' | 'adult';
 
 export type ShopItemType = 'food' | 'clean' | 'medicine' | 'toy';
 
+export interface IInventoryItem {
+    itemId: Types.ObjectId;
+    quantity: number;
+}
+
 export interface IUser {
     _id: Types.ObjectId;
     name: string;
@@ -13,6 +18,7 @@ export interface IUser {
     passwordHash: string;
     coupleId?: Types.ObjectId | null;
     goldCoins: number;
+    inventory: IInventoryItem[];
     fcmToken?: string | null;
     lastLoginAt: Date;
     createdAt: Date;
@@ -32,15 +38,15 @@ export interface ICouple {
 }
 
 export interface IPetLottieUrls {
-    eggUrl?: string; // Required for egg-laying categories
-    idleUrl: string; // Default resting state
+    eggUrl?: string;
+    idleUrl: string;
     eatingUrl: string;
     bathingUrl: string;
     playingUrl: string;
     sleepingUrl: string;
     sickUrl: string;
     deadUrl: string;
-    walkInUrl?: string; // Entrance animation for mammals
+    walkInUrl?: string;
 }
 
 export interface IPetTemplate {
@@ -49,7 +55,7 @@ export interface IPetTemplate {
     category: PetCategory;
     description: string;
     lottieUrls: IPetLottieUrls;
-    baseHungerDecayRate: number; // Stat decay rate per hour
+    baseHungerDecayRate: number;
     baseMoodDecayRate: number;
     baseCleanlinessDecayRate: number;
     baseEnergyDecayRate: number;
@@ -59,11 +65,11 @@ export interface IPetTemplate {
 }
 
 export interface IPetStats {
-    hunger: number; // 0 - 100
-    mood: number; // 0 - 100
-    cleanliness: number; // 0 - 100
-    health: number; // 0 - 100
-    energy: number; // 0 - 100
+    hunger: number;
+    mood: number;
+    cleanliness: number;
+    health: number;
+    energy: number;
 }
 
 export interface IPet {
@@ -72,7 +78,7 @@ export interface IPet {
     templateId: Types.ObjectId;
     nickname: string;
     stage: PetStage;
-    hatchProgress: number; // 0 - 100 (for egg stage)
+    hatchProgress: number;
     stats: IPetStats;
     partner1LastInteractionAt: Date;
     partner2LastInteractionAt: Date;
@@ -98,8 +104,8 @@ export interface IShopItem {
     type: ShopItemType;
     description: string;
     price: number;
-    iconName: string; // Lucide fallback icon identifier
-    iconSvg?: string; // Raw SVG markup string or SVG URL
+    iconName: string;
+    iconSvg?: string;
     statEffects: IStatEffect;
     isActive: boolean;
     createdAt: Date;

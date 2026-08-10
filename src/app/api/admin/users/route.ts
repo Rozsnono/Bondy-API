@@ -12,7 +12,7 @@ export async function GET() {
 
         return NextResponse.json({ users, couples });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch users and couples' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
     }
 }
 
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
         const existingUser = await User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
-            return NextResponse.json({ error: 'User with this email address already exists' }, { status: 400 });
+            return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
         }
 
         const passwordHash = hashPassword(password);
@@ -41,5 +41,40 @@ export async function POST(req: Request) {
         return NextResponse.json({ user });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request) {
+    try {
+        await dbConnect();
+        const { searchParams } = new URL(req.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+        }
+
+        const user = await User.findById(id);
+        if (user && user.coupleId) {
+            const couple = await Couple.findById(user.coupleId);
+            if (couple) {
+                if (couple.partner1Id.toString() === id && !couple.partner2Id) {
+                    await Couple.findByIdAndDelete(couple._id);
+                } else {
+                    if (couple.partner1Id.toString() === id) {
+                        couple.partner1Id = couple!.partner2Id!;
+                        couple.partner2Id = null as any;
+                    } else {
+                        couple.partner2Id = null as any;
+                    }
+                    await couple.save();
+                }
+            }
+        }
+
+        await User.findByIdAndDelete(id);
+        return NextResponse.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
     }
 }

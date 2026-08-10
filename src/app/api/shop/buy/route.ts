@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { dbConnect } from '../../../../lib/mongodb';
 import User from '../../../../models/User';
-import Couple from '../../../../models/Couple';
-import Pet from '../../../../models/Pet';
 import ShopItem from '../../../../models/ShopItem';
 import { getUserIdFromRequest } from '../../../../lib/auth';
 
@@ -20,8 +18,8 @@ export async function POST(req: Request) {
         }
 
         const user = await User.findById(userId);
-        if (!user || !user.coupleId) {
-            return NextResponse.json({ error: 'User/Couple not found' }, { status: 404 });
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
         const item = await ShopItem.findById(itemId);
@@ -33,51 +31,28 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Insufficient gold coins' }, { status: 400 });
         }
 
-        const couple = await Couple.findById(user.coupleId);
-        if (!couple || !couple.petId) {
-            return NextResponse.json({ error: 'Pet not found' }, { status: 404 });
-        }
-
-        const pet = await Pet.findById(couple.petId);
-        if (!pet || pet.isDead) {
-            return NextResponse.json({ error: 'Pet is unavailable or deceased' }, { status: 400 });
-        }
-
         // Deduct coins
         user.goldCoins -= item.price;
+
+        // Add item to User Inventory
+        const existingIndex = user.inventory.findIndex(
+            (inv) => inv.itemId.toString() === item._id.toString()
+        );
+
+        if (existingIndex >= 0) {
+            user.inventory[existingIndex].quantity += 1;
+        } else {
+            user.inventory.push({ itemId: item._id, quantity: 1 });
+        }
+
         await user.save();
 
-        // Apply stat effects
-        if (item.statEffects.hunger) {
-            pet.stats.hunger = Math.min(100, pet.stats.hunger + item.statEffects.hunger);
-        }
-        if (item.statEffects.mood) {
-            pet.stats.mood = Math.min(100, pet.stats.mood + item.statEffects.mood);
-        }
-        if (item.statEffects.cleanliness) {
-            pet.stats.cleanliness = Math.min(100, pet.stats.cleanliness + item.statEffects.cleanliness);
-        }
-        if (item.statEffects.health) {
-            pet.stats.health = Math.min(100, pet.stats.health + item.statEffects.health);
-        }
-        if (item.statEffects.energy) {
-            pet.stats.energy = Math.min(100, pet.stats.energy + item.statEffects.energy);
-        }
-
-        const now = new Date();
-        if (couple.partner1Id.toString() === userId) {
-            pet.partner1LastInteractionAt = now;
-        } else {
-            pet.partner2LastInteractionAt = now;
-        }
-        pet.lastStatsUpdateAt = now;
-
-        await pet.save();
+        const populatedUser = await User.findById(userId).populate('inventory.itemId');
 
         return NextResponse.json({
-            message: `Successfully purchased and used ${item.name}!`,
+            message: `Added ${item.name} to your Inventory!`,
             remainingGold: user.goldCoins,
-            pet,
+            inventory: populatedUser?.inventory || [],
         });
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

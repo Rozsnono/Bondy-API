@@ -14,11 +14,11 @@ import {
     KeyRound,
     Wifi,
     Battery,
-    Sparkles,
     Loader2,
+    Dog,
 } from 'lucide-react';
 
-const ADMIN_VERSION = 'v2.6.2';
+const ADMIN_VERSION = 'v2.7.0';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -82,20 +82,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const dockApps = [
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, color: 'from-blue-500 to-indigo-600' },
         { name: 'Pet Species', href: '/admin/pet-templates', icon: PawPrint, color: 'from-pink-500 to-rose-600' },
+        { name: 'Active User Pets', href: '/admin/pets', icon: Dog, color: 'from-emerald-500 to-teal-600' },
         { name: 'Shop Catalog', href: '/admin/shop', icon: ShoppingBag, color: 'from-amber-500 to-orange-600' },
         { name: 'Users Directory', href: '/admin/users', icon: Users, color: 'from-cyan-500 to-blue-600' },
-        { name: 'Couples Hub', href: '/admin/couples', icon: Heart, color: 'from-emerald-500 to-teal-600' },
+        { name: 'Couples Hub', href: '/admin/couples', icon: Heart, color: 'from-purple-500 to-indigo-600' },
     ];
 
     const getActiveAppName = () => {
         if (pathname === '/admin/pet-templates') return 'Pet Species App';
+        if (pathname === '/admin/pets') return 'Active User Pets App';
         if (pathname === '/admin/shop') return 'Shop Catalog App';
         if (pathname === '/admin/users') return 'Users Directory App';
         if (pathname === '/admin/couples') return 'Couples Hub App';
         return 'Dashboard App';
     };
 
-    // macOS Boot Loader
     if (isAuthenticated === null) {
         return (
             <div className="min-h-screen bg-[#07080c] flex flex-col items-center justify-center text-slate-400 font-sans space-y-4 select-none">
@@ -114,7 +115,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         );
     }
 
-    // macOS Lock Screen
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-[#0a0b10] bg-[radial-gradient(ellipse_100%_100%_at_50%_20%,rgba(219,39,119,0.25),rgba(0,0,0,1))] flex items-center justify-center p-4 font-sans select-none">
@@ -131,7 +131,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                     <div>
                         <h2 className="text-xl font-bold text-white tracking-tight">Bondy OS</h2>
-                        <p className="text-xs text-slate-400 mt-1">macOS Security Lock Screen • <span className="font-mono text-pink-400">{ADMIN_VERSION}</span></p>
+                        <p className="text-xs text-slate-400 mt-1">
+                            macOS Security Lock Screen • <span className="font-mono text-pink-400">{ADMIN_VERSION}</span>
+                        </p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-4">

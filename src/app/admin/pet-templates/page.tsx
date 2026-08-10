@@ -8,8 +8,6 @@ import {
     Edit,
     PawPrint,
     X,
-    Minus,
-    Maximize2,
     ChevronLeft,
     ChevronRight,
     LayoutGrid,
@@ -19,6 +17,7 @@ import {
     Send,
 } from 'lucide-react';
 import { IPetTemplate, PetCategory } from '@/types/db';
+import { WebLottieViewer } from '@/components/WebLottieViewer';
 
 export default function PetTemplatesAdminPage() {
     const [templates, setTemplates] = useState<IPetTemplate[]>([]);
@@ -247,22 +246,24 @@ export default function PetTemplatesAdminPage() {
                                     key={t._id.toString()}
                                     className="group flex flex-col items-center cursor-pointer space-y-2 text-center"
                                 >
-                                    <div className="relative w-28 h-28 rounded-2xl bg-slate-900 border border-white/10 group-hover:border-rose-500/80 group-hover:bg-rose-500/10 transition-all flex flex-col items-center justify-center p-3 shadow-lg">
-                                        <PawPrint className="w-10 h-10 text-rose-400 mb-1" />
-                                        <span className="text-[9px] uppercase font-bold text-slate-400 px-1.5 py-0.5 bg-black/50 rounded">
+                                    <div className="relative w-32 h-32 rounded-2xl bg-slate-900 border border-white/10 group-hover:border-rose-500/80 group-hover:bg-rose-500/10 transition-all flex flex-col items-center justify-center p-2 shadow-lg overflow-hidden">
+                                        {/* Animated Lottie Pet Cover Image */}
+                                        <WebLottieViewer src={t.lottieUrls.idleUrl} className="w-20 h-20 flex items-center justify-center pointer-events-none" />
+
+                                        <span className="text-[9px] uppercase font-bold text-slate-400 px-1.5 py-0.5 bg-black/60 rounded mt-1">
                                             {t.category}
                                         </span>
 
-                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
                                             <button
                                                 onClick={() => handleOpenEdit(t)}
-                                                className="p-1 bg-slate-800 text-white rounded hover:bg-slate-700"
+                                                className="p-1 bg-slate-800 text-white rounded hover:bg-slate-700 shadow"
                                             >
                                                 <Edit className="w-3 h-3" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(t._id.toString())}
-                                                className="p-1 bg-rose-500/20 text-rose-400 rounded hover:bg-rose-500/40"
+                                                className="p-1 bg-rose-500/20 text-rose-400 rounded hover:bg-rose-500/40 shadow"
                                             >
                                                 <Trash2 className="w-3 h-3" />
                                             </button>
@@ -282,14 +283,13 @@ export default function PetTemplatesAdminPage() {
             {/* macOS Mail Compose Style Sheet Modal */}
             <AnimatePresence>
                 {isModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                         <motion.div
                             initial={{ scale: 0.94, y: -20, opacity: 0 }}
                             animate={{ scale: 1, y: 0, opacity: 1 }}
                             exit={{ scale: 0.94, y: 20, opacity: 0 }}
                             className="bg-[#1c1c22] border border-white/15 rounded-2xl w-full max-w-xl max-h-[88vh] overflow-hidden flex flex-col shadow-2xl backdrop-blur-3xl text-xs text-slate-200"
                         >
-                            {/* Mail Toolbar Header */}
                             <div className="h-11 bg-[#16161b] border-b border-white/10 px-4 flex items-center justify-between flex-shrink-0">
                                 <div className="flex items-center gap-2">
                                     <button
@@ -316,7 +316,6 @@ export default function PetTemplatesAdminPage() {
                                 </button>
                             </div>
 
-                            {/* Form Content - Divided Field Rows */}
                             <form id="speciesForm" onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
                                 <div className="divide-y divide-white/10">
                                     <div className="flex items-center px-4 py-2.5">
@@ -359,7 +358,6 @@ export default function PetTemplatesAdminPage() {
                                     </div>
                                 </div>
 
-                                {/* Lottie Assets Grid Area */}
                                 <div className="p-4 space-y-3 bg-black/20">
                                     <p className="font-bold text-rose-400 uppercase tracking-wider text-[10px]">
                                         Lottie JSON Animation URLs

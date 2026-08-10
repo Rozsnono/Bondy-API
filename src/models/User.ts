@@ -3,6 +3,22 @@ import { IUser } from '../types/db';
 
 export interface IUserDocument extends Omit<IUser, '_id'>, Document { }
 
+const InventoryItemSchema = new Schema(
+    {
+        itemId: {
+            type: Schema.Types.ObjectId,
+            ref: 'ShopItem',
+            required: true,
+        },
+        quantity: {
+            type: Number,
+            default: 1,
+            min: 0,
+        },
+    },
+    { _id: false }
+);
+
 const UserSchema = new Schema<IUserDocument>(
     {
         name: {
@@ -30,6 +46,10 @@ const UserSchema = new Schema<IUserDocument>(
             type: Number,
             default: 100,
             min: 0,
+        },
+        inventory: {
+            type: [InventoryItemSchema],
+            default: [],
         },
         fcmToken: {
             type: String,

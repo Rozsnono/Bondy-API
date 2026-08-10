@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Search, Coins, Share, UserPlus, X, Send } from 'lucide-react';
+import { Users, Search, Coins, Share, UserPlus, X, Send, Trash2 } from 'lucide-react';
 import { IUser } from '@/types/db';
 
 export default function UsersAdminPage() {
@@ -47,6 +47,13 @@ export default function UsersAdminPage() {
         } else {
             const data = await res.json();
             alert(data.error || 'Failed to create user');
+        }
+    };
+
+    const handleDeleteUser = async (id: string, name: string) => {
+        if (confirm(`Are you sure you want to delete user "${name}"?`)) {
+            await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
+            fetchUsers();
         }
     };
 
@@ -181,6 +188,13 @@ export default function UsersAdminPage() {
                                     >
                                         {u.coupleId ? '#Paired' : '#Single'}
                                     </span>
+
+                                    <button
+                                        onClick={() => handleDeleteUser(u._id.toString(), u.name)}
+                                        className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors ml-2"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
                             </div>
                         ))
